@@ -5,25 +5,29 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 
-# -----------------------------
-# 👇 СЮДА ВСТАВЬТЕ СВОЙ ТОКЕН ОТ @BotFather
-TOKEN = "ВАШ_ТОКЕН_БОТА"
-# -----------------------------
+# ==================================================
+# БЕЗОПАСНО: Токен берется из переменной окружения BOT_TOKEN
+# ==================================================
+TOKEN = os.getenv("BOT_TOKEN")
 
-# Включаем логирование (для отладки)
+# Простая проверка: если токен не найден, бот не запустится и укажет на ошибку.
+if TOKEN is None:
+    raise ValueError("❗ Ошибка: Переменная окружения BOT_TOKEN не найдена. Убедитесь, что вы её добавили.")
+
+# Включаем логирование
 logging.basicConfig(level=logging.INFO)
 
 # Создаём бота и диспетчер
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# ---------- КЛАВИАТУРА С ДВУМЯ КНОПКАМИ ----------
+# ---------- КЛАВИАТУРА ----------
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🎁 Промокоды")],
         [KeyboardButton(text="🔗 Актуальная ссылка на 1win")]
     ],
-    resize_keyboard=True   # кнопки подстраиваются под экран
+    resize_keyboard=True
 )
 
 # ---------- ОБРАБОТЧИК КОМАНДЫ /start ----------
