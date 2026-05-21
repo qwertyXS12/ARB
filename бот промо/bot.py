@@ -5,23 +5,14 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 
-# ==================================================
-# БЕЗОПАСНО: Токен берется из переменной окружения BOT_TOKEN
-# ==================================================
 TOKEN = os.getenv("BOT_TOKEN")
-
-# Простая проверка: если токен не найден, бот не запустится и укажет на ошибку.
 if TOKEN is None:
-    raise ValueError("❗ Ошибка: Переменная окружения BOT_TOKEN не найдена. Убедитесь, что вы её добавили.")
+    raise ValueError("❗ Переменная окружения BOT_TOKEN не найдена.")
 
-# Включаем логирование
 logging.basicConfig(level=logging.INFO)
-
-# Создаём бота и диспетчер
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# ---------- КЛАВИАТУРА ----------
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🎁 Промокоды")],
@@ -30,7 +21,6 @@ main_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# ---------- ОБРАБОТЧИК КОМАНДЫ /start ----------
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     await message.answer(
@@ -39,7 +29,6 @@ async def cmd_start(message: types.Message):
         reply_markup=main_keyboard
     )
 
-# ---------- КНОПКА "Промокоды" ----------
 @dp.message(lambda message: message.text == "🎁 Промокоды")
 async def send_promocodes(message: types.Message):
     text = (
@@ -61,7 +50,6 @@ async def send_promocodes(message: types.Message):
     )
     await message.answer(text, parse_mode="Markdown")
 
-# ---------- КНОПКА "Актуальная ссылка на 1win" ----------
 @dp.message(lambda message: message.text == "🔗 Актуальная ссылка на 1win")
 async def send_actual_links(message: types.Message):
     links_text = (
@@ -71,15 +59,17 @@ async def send_actual_links(message: types.Message):
     )
     await message.answer(links_text, parse_mode="Markdown")
 
-    # Отправляем фото (файл должен лежать рядом с bot.py)
-    photo_path = "qr-png-512-512 (1).png"
+    # --- ФИКС: правильное имя файла (без пробелов и скобок) ---
+    photo_path = "qr.png"
+    # Доп. отладка: напечатаем в лог путь и проверим существование
+    logging.info(f"Ищем файл: {photo_path}, текущая папка: {os.getcwd()}, файлы в папке: {os.listdir('.')}")
+    
     if os.path.exists(photo_path):
         photo = FSInputFile(photo_path)
         await message.answer_photo(photo, caption="📱 QR-код для быстрого перехода")
     else:
-        await message.answer("⚠️ Фото с QR-кодом не найдено. Положите файл 'qr-png-512-512 (1).png' в ту же папку, что и бот.")
+        await message.answer("⚠️ Фото с QR-кодом не найдено. Убедитесь, что файл 'qr.png' лежит в папке с ботом.")
 
-# ---------- ЗАПУСК ----------
 async def main():
     print("✅ Бот запущен...")
     await dp.start_polling(bot)
